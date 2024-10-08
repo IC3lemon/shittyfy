@@ -1,9 +1,10 @@
 # `shittyfy`
-Spotify premium is a nono. pls dont diss, a literal script baby is learning scraping, scripting and having fun.
-Made this because im too jobless and wish to eradicate spotify premium, and the need to pay for downloading songs while maintaining a good playlist.
+Spotify premium is a nono. pls dont diss, a literal script baby is learning scraping, scripting and having fun. \
+Mini mini project because im too jobless and wish to eradicate spotify premium, and the need to pay for downloading songs while maintaining a good playlist.
+Also my github barren.
 ***
 ## dependencies : 
-`pygame``scrapetube``python-dotenv``spotipy``pytube``yt-dlp``ffmpeg`
+`pygame scrapetube python-dotenv spotipy pytube yt-dlp ffmpeg`
 ***
 ## Instructions :
 - clone this repo
