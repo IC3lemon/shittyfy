@@ -164,24 +164,37 @@ songs = []
 for file in os.listdir(folder_path):
     songs.append(file)
 
-def play_mp3_files(mp3_files, folder_path):
+def play_mp3_files(mp3_files, folder_path, looping):
     # Initialize pygame mixer
     pygame.mixer.init()
     
-    # Play each mp3 file in the list
-    for file_name in mp3_files:
-        file_path = os.path.join(folder_path, file_name)
-        print(f"Now playing: {file_name}")
-        
-        # Load and play the mp3 file
-        pygame.mixer.music.load(file_path)
-        pygame.mixer.music.play()
-        
-        # Wait for the song to finish
-        while pygame.mixer.music.get_busy():
-            continue  # Loop while the song is playing
-
+    if looping:
+        while looping:
+        # Play each mp3 file in the list
+            for file_name in mp3_files:
+                file_path = os.path.join(folder_path, file_name)
+                print(f"Now playing: {file_name}")
+                
+                # Load and play the mp3 file
+                pygame.mixer.music.load(file_path)
+                pygame.mixer.music.play()
+                
+                # Wait for the song to finish
+                while pygame.mixer.music.get_busy():
+                    continue  # Loop while the song is playing
+    else:
+          for file_name in mp3_files:
+                file_path = os.path.join(folder_path, file_name)
+                print(f"Now playing: {file_name}")
+                
+                # Load and play the mp3 file
+                pygame.mixer.music.load(file_path)
+                pygame.mixer.music.play()
+                
+                # Wait for the song to finish
+                while pygame.mixer.music.get_busy():
+                    continue  # Loop while the song is playing
     # Quit pygame mixer after all songs are played
     pygame.mixer.quit()
 
-play_mp3_files(songs, folder_path)
+play_mp3_files(songs, folder_path, looping=True)
