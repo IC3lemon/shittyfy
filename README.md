@@ -14,7 +14,7 @@ pygame scrapetube python-dotenv spotipy pytube yt-dlp ffmpeg
 - create a "premium playlist" (temporary, aiming to make all playlists a user has available offline automatic). You save songs to this playlist, it becomes available offline because the script(should setup a periodic cronjob for the script).
 - generate link for the playlist. u get smth like this `https://open.spotify.com/playlist/REDACTED1?si=REDACTED2`. `REDACTED1` is your playlist ID.
 - update the `.env` with the variables `client ID` `client SECRET` `playlist ID` `username`
-- run the <a href="https://github.com/IC3lemon/shittyfy/blob/main/main.py">"`thing`</a>
+- run the <a href="https://github.com/IC3lemon/shittyfy/blob/main/main.py">`thing`</a>
 ***
 ## TODO's :
 - [ ] make shittyfy a true pseudo spotify premium. 
