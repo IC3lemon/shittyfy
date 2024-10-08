@@ -1,7 +1,7 @@
 # `shittyfy`
 Spotify premium is a nono. pls dont diss, a literal toddler is learning scraping, scripting and having fun. \
 Mini mini project because im too jobless and wish to eradicate spotify premium, and the need to pay for downloading songs while maintaining a good playlist.
-Also my github barren.
+Also my github barren.<br><br>idk if this legal honestly btw
 ***
 ## DEPENDENCIES : 
 ```
