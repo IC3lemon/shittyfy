@@ -5,6 +5,7 @@ import pygame
 import threading
 import signal
 import sys
+import time
 
 app = Flask(__name__)
 CORS(app)
@@ -18,34 +19,58 @@ songs = []
 current_index = 0
 current_time = 0
 song_length = 0
+is_looping = False
+playback_active = True
 
-# Background thread to update current playback time
-def update_current_time():
-    global current_time
-    while True:
+def song_finished_callback():
+    """Callback function when a song finishes playing"""
+    if is_looping:
+        # Replay the current song
+        pygame.mixer.music.play()
+    else:
+        # Play next song
+        next_song(auto=True)
+
+# Background thread to monitor playback and handle song completion
+def monitor_playback():
+    global current_time, playback_active
+    last_pos = 0
+    while playback_active:
+        time.sleep(0.1)  # Check every 100ms
         if pygame.mixer.music.get_busy():
             current_time = pygame.mixer.music.get_pos() / 1000
+            last_pos = current_time
+        else:
+            # If music isn't playing and we were previously playing (last_pos > 0),
+            # then the song has finished
+            if last_pos > 0:
+                last_pos = 0
+                song_finished_callback()
 
-# Mark thread as a daemon
-threading.Thread(target=update_current_time, daemon=True).start()
+# Start monitoring thread
+def start_monitor():
+    threading.Thread(target=monitor_playback, daemon=True).start()
+
+start_monitor()
 
 # Graceful shutdown handler
 def shutdown_handler(sig, frame):
+    global playback_active
     print("Shutting down gracefully...")
-    pygame.mixer.music.stop()  # Stop music playback
-    pygame.mixer.quit()  # Quit the mixer
+    playback_active = False
+    pygame.mixer.music.stop()
+    pygame.mixer.quit()
     sys.exit(0)
 
-signal.signal(signal.SIGINT, shutdown_handler)  # Handle Ctrl+C
-signal.signal(signal.SIGTERM, shutdown_handler)  # Handle termination
+signal.signal(signal.SIGINT, shutdown_handler)
+signal.signal(signal.SIGTERM, shutdown_handler)
 
 @app.route('/favicon.ico')
 def favicon():
-    return "", 204  # Returns an empty response with "No Content"
+    return "", 204
 
 @app.route('/')
 def index():
-    # Serve an index.html file if you have one
     return redirect(url_for('static', filename='index.html'))
 
 @app.route('/load', methods=['GET'])
@@ -54,7 +79,6 @@ def load_songs():
     if not os.path.isdir(folder_path):
         return jsonify({"error": "Songs folder not found"}), 404
 
-    # List mp3 files
     songs = [f for f in os.listdir(folder_path) if f.endswith(".mp3")]
     if not songs:
         return jsonify({"error": "No songs found in the folder"}), 404
@@ -81,7 +105,7 @@ def unpause():
     return jsonify({"status": "unpaused"})
 
 @app.route('/next', methods=['POST'])
-def next_song():
+def next_song(auto=False):
     global current_index, song_length
     if songs:
         current_index = (current_index + 1) % len(songs)
@@ -105,6 +129,12 @@ def set_position():
     position = request.json.get("position", 0)
     pygame.mixer.music.play(start=position)
     return jsonify({"status": "position set", "position": position})
+
+@app.route('/toggle_loop', methods=['POST'])
+def toggle_loop():
+    global is_looping
+    is_looping = request.json.get("loop", False)
+    return jsonify({"looping": is_looping})
 
 @app.route('/play_song', methods=['POST'])
 def play_song():

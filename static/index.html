@@ -224,126 +224,170 @@
     </div>
 
     <script>
-        let songs = [];
-        let slider = document.getElementById('slider');
-        let timeDisplay = document.getElementById('time');
-        let currentSongIndex = 0;
-        let isLooping = false;
+        // Initialize variables
+        let currentSong = '';
         let isPlaying = false;
+        let isLooping = false;
+        let songs = [];
+        let audioPosition = 0;
+        let audioLength = 0;
 
-        function loadSongs() {
-            fetch('/load')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.songs) {
-                        songs = data.songs;
-                        renderSongList();
-                        updateCurrentSong(data.current_song);
-                    }
-                });
-        }
+        // DOM Elements
+        const songsList = document.querySelector('#songs');
+        const currentSongElement = document.querySelector('#currentSong');
+        const playPauseButton = document.querySelector('#playPauseButton');
+        const loopSlider = document.querySelector('#loopSlider');
+        const timeDisplay = document.querySelector('#time');
+        const progressSlider = document.querySelector('#slider');
 
-        function renderSongList() {
-            const songList = document.getElementById('songs');
-            songList.innerHTML = '';
+        // Load songs when page loads
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch('/load');
+                const data = await response.json();
+                songs = data.songs;
+                displaySongs();
+                if (songs.length > 0) {
+                    currentSong = data.current_song;
+                    updateCurrentSongDisplay();
+                }
+            } catch (error) {
+                console.error('Error loading songs:', error);
+            }
+        });
+
+        // Display songs in the list
+        function displaySongs() {
+            songsList.innerHTML = '';
             songs.forEach(song => {
                 const li = document.createElement('li');
-                li.textContent = song;
-                li.onclick = () => selectSong(song);
-                songList.appendChild(li);
+                li.textContent = song.replace('.mp3', '');
+                li.onclick = () => playSong(song);
+                songsList.appendChild(li);
             });
         }
 
-        function selectSong(song) {
-            fetch('/play_song', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ song_name: song })
-            }).then(response => response.json())
-              .then(data => {
-                  if (data.current_song) {
-                      updateCurrentSong(data.current_song);
-                  }
-              });
+        // Update the current song display
+        function updateCurrentSongDisplay() {
+            currentSongElement.textContent = currentSong.replace('.mp3', '');
         }
 
-        function updateCurrentSong(song) {
-            const currentSongElement = document.getElementById('currentSong');
-            currentSongElement.style.opacity = 0;
-            setTimeout(() => {
-                currentSongElement.textContent = `Playing: ${song}`;
-                currentSongElement.style.opacity = 1;
-            }, 300);
-        }
+        // Toggle play/pause
+        async function togglePlayPause() {
+            if (!currentSong) return;
 
-        function updateSlider() {
-            fetch('/current_position')
-                .then(response => response.json())
-                .then(data => {
-                    slider.max = data.length;
-                    slider.value = data.position;
-                    timeDisplay.textContent = `${formatTime(data.position)} / ${formatTime(data.length)}`;
-                    if (data.position === data.length && isLooping) {
-                        nextSong(); // Automatically move to the next song when the current one ends
-                    }
-                });
-        }
-
-        function formatTime(seconds) {
-            const mins = Math.floor(seconds / 60);
-            const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
-            return `${mins}:${secs}`;
-        }
-
-        function seekSong(value) {
-            fetch('/set_position', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ position: parseFloat(value) })
-            });
-        }
-
-        function togglePlayPause() {
             if (isPlaying) {
-                fetch('/pause', { method: 'POST' })
-                    .then(response => response.json())
-                    .then(data => {
-                        isPlaying = false;
-                        document.getElementById('playPauseButton').textContent = '▷';
-                    });
+                await fetch('/pause', { method: 'POST' });
+                playPauseButton.innerHTML = '<i class="fas fa-play"></i>';
             } else {
-                fetch('/unpause', { method: 'POST' })
-                    .then(response => response.json())
-                    .then(data => {
-                        isPlaying = true;
-                        document.getElementById('playPauseButton').textContent = '❚❚';
-                    });
+                if (audioPosition === 0) {
+                    await fetch('/play', { method: 'POST' });
+                } else {
+                    await fetch('/unpause', { method: 'POST' });
+                }
+                playPauseButton.innerHTML = '<i class="fas fa-pause"></i>';
+            }
+            isPlaying = !isPlaying;
+        }
+
+        // Previous song
+        async function previousSong() {
+            try {
+                const response = await fetch('/previous', { method: 'POST' });
+                const data = await response.json();
+                currentSong = data.current_song;
+                updateCurrentSongDisplay();
+                playPauseButton.innerHTML = '<i class="fas fa-pause"></i>';
+                isPlaying = true;
+            } catch (error) {
+                console.error('Error playing previous song:', error);
             }
         }
 
-        function previousSong() {
-            if (currentSongIndex > 0) {
-                currentSongIndex--;
-                selectSong(songs[currentSongIndex]);
+        // Next song
+        async function nextSong() {
+            try {
+                const response = await fetch('/next', { method: 'POST' });
+                const data = await response.json();
+                currentSong = data.current_song;
+                updateCurrentSongDisplay();
+                playPauseButton.innerHTML = '<i class="fas fa-pause"></i>';
+                isPlaying = true;
+            } catch (error) {
+                console.error('Error playing next song:', error);
             }
         }
 
-        function nextSong() {
-            if (currentSongIndex < songs.length - 1) {
-                currentSongIndex++;
-                selectSong(songs[currentSongIndex]);
-            } else {
-                currentSongIndex = 0;
-                selectSong(songs[currentSongIndex]);
+        // Toggle loop
+        async function toggleLoop() {
+            isLooping = loopSlider.checked;
+            await fetch('/toggle_loop', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ loop: isLooping })
+            });
+        }
+
+        // Seek song
+        async function seekSong(value) {
+            const position = (value / 100) * audioLength;
+            await fetch('/set_position', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ position })
+            });
+        }
+
+        // Play specific song
+        async function playSong(songName) {
+            try {
+                const response = await fetch('/play_song', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ song_name: songName })
+                });
+                const data = await response.json();
+                currentSong = data.current_song;
+                updateCurrentSongDisplay();
+                playPauseButton.innerHTML = '<i class="fas fa-pause"></i>';
+                isPlaying = true;
+            } catch (error) {
+                console.error('Error playing song:', error);
             }
         }
 
-        function toggleLoop() {
-            isLooping = !isLooping;
+        // Format time for display
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.floor(seconds % 60);
+            return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
         }
 
-        setInterval(updateSlider, 1000);
-        loadSongs();
+        // Update time display and slider periodically
+        setInterval(async () => {
+            try {
+                const response = await fetch('/current_position');
+                const data = await response.json();
+                audioPosition = data.position;
+                audioLength = data.length;
+                
+                // Update time display
+                timeDisplay.textContent = `${formatTime(audioPosition)} / ${formatTime(audioLength)}`;
+                
+                // Update slider position
+                if (!progressSlider.matches(':active')) {  // Only update if user isn't dragging
+                    progressSlider.value = (audioPosition / audioLength) * 100;
+                }
+            } catch (error) {
+                console.error('Error updating position:', error);
+            }
+        }, 1000);
     </script>
 </body>
 </html>
