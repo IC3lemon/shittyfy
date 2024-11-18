@@ -31,4 +31,5 @@ pygame scrapetube python-dotenv spotipy pytube yt-dlp ffmpeg flask
 - [ ] pausing is tweaking the slider, fix it
 ***
 ## SCREENSHOT(S) :
-![image](https://github.com/user-attachments/assets/c61935b4-0593-486b-9f6b-f46b74335735)
+![image](https://github.com/user-attachments/assets/b74539c1-a949-4233-91b4-fd331f924baf)
+
