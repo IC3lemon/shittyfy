@@ -8,7 +8,7 @@ idk if this legal honestly btw<br>
 ***
 ## DEPENDENCIES : 
 ```
-pygame scrapetube python-dotenv spotipy pytube yt-dlp ffmpeg
+pygame scrapetube python-dotenv spotipy pytube yt-dlp ffmpeg flask
 ```
 ***
 ## INSTRUCTIONS :
@@ -27,3 +27,6 @@ pygame scrapetube python-dotenv spotipy pytube yt-dlp ffmpeg
 - [ ] lyrics 
 - [x] looking up an artist.
 - [x] make shit loop
+***
+## SCREENSHOT(S) :
+![image](https://github.com/user-attachments/assets/c61935b4-0593-486b-9f6b-f46b74335735)
