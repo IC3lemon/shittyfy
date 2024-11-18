@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shittyfy</title>
+    <!-- Google Fonts for modern typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1e1e1e 0%, #121212 100%);
+            color: #e5e5e5;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            font-size: 16px;
+            overflow: hidden;
+        }
+
+        #song-list {
+            width: 30%;
+            background-color: #232323;
+            padding: 30px;
+            border-right: 1px solid #333;
+            overflow-y: auto;
+            border-radius: 10px;
+        }
+
+        h3 {
+            font-size: 24px;
+            font-weight: 500;
+            color: #fff;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        #songs {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #songs li {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            transition: background-color 0.3s ease, transform 0.2s;
+        }
+
+        #songs li:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: scale(1.05);
+        }
+
+        #player {
+            flex: 1;
+            background: radial-gradient(circle, rgba(36, 36, 36, 1) 0%, rgba(18, 18, 18, 1) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            position: relative;
+        }
+
+        #currentSong {
+            font-size: 28px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            color: #fff;
+            text-align: center;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        #logo {
+            width: 120px;
+            height: auto;
+            margin-bottom: 20px;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        button {
+            background-color: #e50914;
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 26px;
+            width: 60px;
+            height: 60px;
+            margin: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+        }
+
+        button:hover {
+            background-color: #b20710;
+            transform: scale(1.1);
+        }
+
+        #slider {
+            width: 100%;
+            margin: 20px 0;
+            background-color: #333;
+            border-radius: 5px;
+            height: 10px;
+            cursor: pointer;
+        }
+
+        #slider::-webkit-slider-thumb {
+            background-color: #e50914;
+            border: 2px solid #b20710;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            transition: background-color 0.3s ease;
+        }
+
+        #slider::-webkit-slider-thumb:hover {
+            background-color: #b20710;
+        }
+
+        #time {
+            color: #b3b3b3;
+            font-size: 16px;
+            margin-top: 15px;
+        }
+
+        /* Custom slider toggle for loop */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        .toggle-container label {
+            color: #fff;
+            margin-right: 15px;
+            font-weight: 500;
+            font-size: 18px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 70px;
+            height: 35px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #777;
+            transition: 0.4s;
+            border-radius: 50px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 28px;
+            width: 28px;
+            border-radius: 50%;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+        }
+
+        input:checked + .slider {
+            background-color: #e50914;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(35px);
+        }
+
+    </style>
+</head>
+<body>
+    <div id="song-list">
+        <h3>Shitty Music</h3>
+        <ul id="songs"></ul>
+    </div>
+    <div id="player">
+        <img id="logo" src="image.png" alt="Shittify Logo" />
+        <h2 id="currentSong">No song loaded</h2>
+        <div>
+            <button onclick="previousSong()"><i class="fas fa-backward"></i></button>
+            <button id="playPauseButton" onclick="togglePlayPause()">▷</button>
+            <button onclick="nextSong()"><i class="fas fa-forward"></i></button>
+        </div>
+        
+        <!-- Loop toggle slider -->
+        <div class="toggle-container">
+            <label for="loopSlider">⟳ Loop </label>
+            <label class="switch">
+                <input type="checkbox" id="loopSlider" onclick="toggleLoop()"> <!-- Loop toggle slider -->
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div>
+            <input type="range" id="slider" min="0" max="100" value="0" step="0.1" onchange="seekSong(this.value)">
+        </div>
+        <p id="time">0:00 / 0:00</p>
+    </div>
+
+    <script>
+        let songs = [];
+        let slider = document.getElementById('slider');
+        let timeDisplay = document.getElementById('time');
+        let currentSongIndex = 0;
+        let isLooping = false;
+        let isPlaying = false;
+
+        function loadSongs() {
+            fetch('/load')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.songs) {
+                        songs = data.songs;
+                        renderSongList();
+                        updateCurrentSong(data.current_song);
+                    }
+                });
+        }
+
+        function renderSongList() {
+            const songList = document.getElementById('songs');
+            songList.innerHTML = '';
+            songs.forEach(song => {
+                const li = document.createElement('li');
+                li.textContent = song;
+                li.onclick = () => selectSong(song);
+                songList.appendChild(li);
+            });
+        }
+
+        function selectSong(song) {
+            fetch('/play_song', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ song_name: song })
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.current_song) {
+                      updateCurrentSong(data.current_song);
+                  }
+              });
+        }
+
+        function updateCurrentSong(song) {
+            const currentSongElement = document.getElementById('currentSong');
+            currentSongElement.style.opacity = 0;
+            setTimeout(() => {
+                currentSongElement.textContent = `Playing: ${song}`;
+                currentSongElement.style.opacity = 1;
+            }, 300);
+        }
+
+        function updateSlider() {
+            fetch('/current_position')
+                .then(response => response.json())
+                .then(data => {
+                    slider.max = data.length;
+                    slider.value = data.position;
+                    timeDisplay.textContent = `${formatTime(data.position)} / ${formatTime(data.length)}`;
+                    if (data.position === data.length && isLooping) {
+                        nextSong(); // Automatically move to the next song when the current one ends
+                    }
+                });
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
+            return `${mins}:${secs}`;
+        }
+
+        function seekSong(value) {
+            fetch('/set_position', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ position: parseFloat(value) })
+            });
+        }
+
+        function togglePlayPause() {
+            if (isPlaying) {
+                fetch('/pause', { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        isPlaying = false;
+                        document.getElementById('playPauseButton').textContent = '▷';
+                    });
+            } else {
+                fetch('/unpause', { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        isPlaying = true;
+                        document.getElementById('playPauseButton').textContent = '❚❚';
+                    });
+            }
+        }
+
+        function previousSong() {
+            if (currentSongIndex > 0) {
+                currentSongIndex--;
+                selectSong(songs[currentSongIndex]);
+            }
+        }
+
+        function nextSong() {
+            if (currentSongIndex < songs.length - 1) {
+                currentSongIndex++;
+                selectSong(songs[currentSongIndex]);
+            } else {
+                currentSongIndex = 0;
+                selectSong(songs[currentSongIndex]);
+            }
+        }
+
+        function toggleLoop() {
+            isLooping = !isLooping;
+        }
+
+        setInterval(updateSlider, 1000);
+        loadSongs();
+    </script>
+</body>
+</html>
