@@ -26,7 +26,8 @@ pygame scrapetube python-dotenv spotipy pytube yt-dlp ffmpeg flask
 - [x] give it a UI when playing songs. *** 
 - [ ] lyrics 
 - [x] looking up an artist.
-- [x] make shit loop
+- [ ] make shit loop
+- [ ] get the godforsaken slider to stop tweaking
 ***
 ## SCREENSHOT(S) :
 ![image](https://github.com/user-attachments/assets/c61935b4-0593-486b-9f6b-f46b74335735)
