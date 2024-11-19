@@ -112,14 +112,19 @@ def convert_ms(milliseconds):
 def time_difference(time1, time2):
     # Convert each time to seconds
     def to_seconds(time_str):
-        minutes, seconds = map(int, time_str.split(':'))
-        return minutes * 60 + seconds
+        parts = time_str.strip().split(':')
+        if len(parts) == 2:  # minutes:seconds format
+            minutes, seconds = map(int, parts)
+            return (minutes * 60 + seconds) * 1000
+        elif len(parts) == 3:  # hours:minutes:seconds format
+            hours, minutes, seconds = map(int, parts)
+            return (hours * 3600 + minutes * 60 + seconds) * 1000
+        else:
+            raise ValueError("Invalid time format. Use either 'minutes:seconds' or 'hours:minutes:seconds'")
     
     seconds1 = to_seconds(time1)
     seconds2 = to_seconds(time2)
     
-    return abs(seconds2 - seconds1)
-
 def get_songs():
     songs = []
     for file in os.listdir(folder_path):
